@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useState, useRef, useCallback, useLayoutEffect } from "react"
+import { useTheme } from "../contexts/ThemeContext"
 
 const Tooltip = ({
   children,
@@ -16,12 +17,14 @@ const Tooltip = ({
   customTextColor = "#000000",
   forcePosition = false,
 }) => {
+  const { isDark } = useTheme()
   const [visible, setVisible] = useState(false)
   const [actualPosition, setActualPosition] = useState(position)
   const tooltipRef = useRef(null)
   const containerRef = useRef(null)
   const timeoutRef = useRef(null)
 
+  // Update actual position when position prop changes or when forcePosition is true
   useLayoutEffect(() => {
     if (forcePosition) {
       setActualPosition(position)
@@ -149,22 +152,35 @@ const Tooltip = ({
       }
     }
 
-    const gradientMap = {
-      "bg-white": "linear-gradient(135deg, #ffffff, #f8fafc)",
-      "bg-black": "linear-gradient(135deg, #000000, #1f2937)",
-      "bg-gray-800": "linear-gradient(135deg, #1f2937, #111827)",
-      "bg-gray-600": "linear-gradient(135deg, #4b5563, #374151)",
-      "bg-gray-100": "linear-gradient(135deg, #f3f4f6, #e5e7eb)",
-      "bg-gray-50": "linear-gradient(135deg, #f9fafb, #f3f4f6)",
-    }
+    // Enhanced gradient backgrounds for preset colors with theme awareness
+    const gradientMap = isDark
+      ? {
+          "bg-white": "linear-gradient(135deg, #ffffff, #f8fafc)",
+          "bg-black": "linear-gradient(135deg, #000000, #1f2937)",
+          "bg-gray-800": "linear-gradient(135deg, #1f2937, #111827)",
+          "bg-gray-600": "linear-gradient(135deg, #4b5563, #374151)",
+          "bg-gray-100": "linear-gradient(135deg, #f3f4f6, #e5e7eb)",
+          "bg-gray-50": "linear-gradient(135deg, #f9fafb, #f3f4f6)",
+        }
+      : {
+          "bg-white": "linear-gradient(135deg, #ffffff, #f8fafc)",
+          "bg-black": "linear-gradient(135deg, #000000, #1f2937)",
+          "bg-gray-800": "linear-gradient(135deg, #1f2937, #111827)",
+          "bg-gray-600": "linear-gradient(135deg, #4b5563, #374151)",
+          "bg-gray-100": "linear-gradient(135deg, #f3f4f6, #e5e7eb)",
+          "bg-gray-50": "linear-gradient(135deg, #f9fafb, #f3f4f6)",
+        }
 
     return {
       background: gradientMap[bgColor] || gradientMap["bg-white"],
       backdropFilter: "blur(12px)",
-      border:
-        bgColor.includes("white") || bgColor.includes("gray-")
+      border: isDark
+        ? bgColor.includes("white") || bgColor.includes("gray-")
           ? "1px solid rgba(0,0,0,0.1)"
-          : "1px solid rgba(255,255,255,0.1)",
+          : "1px solid rgba(255,255,255,0.1)"
+        : bgColor.includes("black") || bgColor.includes("gray-8")
+          ? "1px solid rgba(255,255,255,0.1)"
+          : "1px solid rgba(0,0,0,0.1)",
     }
   }
 
@@ -195,8 +211,9 @@ const Tooltip = ({
           style={{
             ...getTooltipStyles(),
             ...getRelativePosition(actualPosition),
-            boxShadow:
-              "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04), 0 0 0 1px rgba(255, 255, 255, 0.05)",
+            boxShadow: isDark
+              ? "0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.05)"
+              : "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04), 0 0 0 1px rgba(0, 0, 0, 0.05)",
           }}
           aria-live="polite"
         >
